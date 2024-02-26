@@ -1,6 +1,8 @@
 import logging
 
+import pandas as pd
 import psycopg2
+from sqlalchemy import create_engine
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -11,9 +13,11 @@ class Postgres:
 
         self.__CREDENTIALS = credentials
 
-        self.URI = f"postgresql://{credentials['user']}:\
-                    {credentials['password']}@{credentials['host']}\
-                    :{credentials['port']}/{credentials['database']}"
+        self.URI = (
+            f"postgresql://{credentials['user']}:{credentials['password']}@"
+            f"{credentials['host']}:{credentials['port']}"
+            f"/{credentials['database']}"
+        )
 
     def get_conn(self):
 
@@ -31,22 +35,30 @@ class Postgres:
 
             logger.error(error)
 
-    def execute_query(self, query: str, vars: str = "") -> None:
+    def get_data(self, table: str, schema: str) -> pd.DataFrame:
         """
         Abstraction of a query execution.
         Args:
             Query: str. A query to be run.
             Vars: str. Variables to be inserted.
         Return:
-            None, it executes a query in a DB.
-
+            Pandas Dataframe, it executes a query in a DB.
         """
 
         conn = self.get_conn()
         cur = conn.cursor()
 
-        cur.execute(query=query, vars=(vars,))
+        alchemy_engine = create_engine(self.URI)
+        db_conn = alchemy_engine.connect()
+
+        # query = f"""SELECT * FROM {schema}.{table}"""
+
+        df = pd.read_sql_table(table_name=table, con=db_conn)
 
         conn.commit()
         conn.close()
         cur.close()
+
+        print(df.head())
+
+        return df
