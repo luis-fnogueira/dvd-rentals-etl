@@ -12,8 +12,8 @@ class Postgres:
         self.__CREDENTIALS = credentials
 
         self.URI = f"postgresql://{credentials['user']}:\
-            {credentials['password']}@{credentials['host']}\
-            :{credentials['port']}/{credentials['database']}"
+                    {credentials['password']}@{credentials['host']}\
+                    :{credentials['port']}/{credentials['database']}"
 
     def get_conn(self):
 
