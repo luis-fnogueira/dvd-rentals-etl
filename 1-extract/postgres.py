@@ -37,12 +37,12 @@ class Postgres:
 
     def get_data(self, table: str) -> pd.DataFrame:
         """
-        Abstraction of a query execution.
+        This function reads data from postgres and creates a pandas df from it.
         Args:
-            Query: str. A query to be run.
-            Vars: str. Variables to be inserted.
+            Table: str. The table where to get data from.
         Return:
-            Pandas Dataframe, it executes a query in a DB.
+            Pandas Dataframe, it executes a query in a DB and return the data
+            as a DF.
         """
 
         conn = self.get_conn()
