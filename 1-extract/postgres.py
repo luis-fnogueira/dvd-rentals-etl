@@ -35,7 +35,7 @@ class Postgres:
 
             logger.error(error)
 
-    def get_data(self, table: str, schema: str) -> pd.DataFrame:
+    def get_data(self, table: str) -> pd.DataFrame:
         """
         Abstraction of a query execution.
         Args:
@@ -51,14 +51,11 @@ class Postgres:
         alchemy_engine = create_engine(self.URI)
         db_conn = alchemy_engine.connect()
 
-        # query = f"""SELECT * FROM {schema}.{table}"""
-
         df = pd.read_sql_table(table_name=table, con=db_conn)
 
         conn.commit()
         conn.close()
         cur.close()
 
-        print(df.head())
-
+        logger.info(f"Dataframe created from table {table}")
         return df
