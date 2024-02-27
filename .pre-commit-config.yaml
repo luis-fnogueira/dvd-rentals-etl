@@ -11,6 +11,7 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+    exclude: .gitignore
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.16.0
