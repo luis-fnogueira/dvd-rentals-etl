@@ -22,7 +22,7 @@ br_path = "s3://dvd-rentals-datalake/bronze/"
 ps = Postgres(credentials=CREDENTIALS)
 session = boto3.Session(profile_name="default")
 
-tables = ["country", "city", "address", "customer", "staff", "rental"]
+tables = ["country", "city", "address", "customer", "staff", "rental", "payment"]
 
 
 for table in tables:
