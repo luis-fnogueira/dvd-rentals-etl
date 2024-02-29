@@ -12,7 +12,6 @@ logging.basicConfig(filename="transformations.log", level=logging.INFO)
 session = boto3.Session(profile_name="default")
 
 
-# Define the paths
 paths = [
     "s3://dvd-rentals-datalake/bronze/rental/",
     "s3://dvd-rentals-datalake/bronze/staff/",
