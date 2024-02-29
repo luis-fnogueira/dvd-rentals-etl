@@ -56,9 +56,63 @@ query = """SELECT
 
 fact_rentals = duckdb.query(query).to_df()
 
+logger.info("Fact table created")
+
+# Loading fact table
 wr.s3.to_parquet(
     df=fact_rentals,
     path="s3://dvd-rentals-datalake/silver/fact_rentals/",
     dataset=True,
     partition_cols=["rental_date"],
 )
+
+logger.info("Fact table loaded")
+
+method_calls = [
+    {
+        "df": staff,
+        "columns": ["address_id", "store_id"],
+        "path": "s3://dvd-rentals-datalake/silver/staff/",
+        "partition_cols": ["staff_id"],
+    },
+    {
+        "df": city,
+        "columns": ["country_id"],
+        "path": "s3://dvd-rentals-datalake/silver/city/",
+        "partition_cols": ["city_id"],
+    },
+    {
+        "df": address,
+        "columns": ["city_id"],
+        "path": "s3://dvd-rentals-datalake/silver/address/",
+        "partition_cols": ["address_id"],
+    },
+    {
+        "df": payment,
+        "columns": ["customer_id", "staff_id", "staff_id"],
+        "path": "s3://dvd-rentals-datalake/silver/payment/",
+        "partition_cols": ["payment_id"],
+    },
+    {
+        "df": customer,
+        "columns": ["address_id", "store_id"],
+        "path": "s3://dvd-rentals-datalake/silver/customer/",
+        "partition_cols": ["customer_id"],
+    },
+]
+
+# Dropping unnecessary columns and loading them to S3
+for call_info in method_calls:
+
+    df = call_info["df"]
+    columns = call_info["columns"]
+    path = call_info["path"]
+    partition_cols = call_info["partition_cols"]
+
+    DVDWrangler.drop_columns(df=df, columns=columns)
+
+    logger.info(f"Columns dropped in {path}")
+
+    wr.s3.to_parquet(df=df, path=path, dataset=True, partition_cols=partition_cols)
+
+    logger.info(f"{path} loaded")

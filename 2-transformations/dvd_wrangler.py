@@ -11,7 +11,7 @@ logging.basicConfig(filename="DVDwrangler.log", level=logging.INFO)
 class DVDWrangler:
 
     @staticmethod
-    def drop_columns(df: pd.DataFrame, columns: list) -> pd.DataFrame:
+    def drop_columns(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
         """_summary_
 
         Args:
