@@ -113,6 +113,6 @@ for call_info in method_calls:
 
     logger.info(f"Columns dropped in {path}")
 
-    wr.s3.to_parquet(df=df, path=path, dataset=True, partition_cols=partition_cols)
+    wr.s3.to_parquet(df=df, path=path, dataset=True)  # , partition_cols=partition_cols)
 
     logger.info(f"{path} loaded")
