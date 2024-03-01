@@ -1,4 +1,3 @@
-# adding transformations to the system path
 import logging
 import sys
 
@@ -6,6 +5,7 @@ import awswrangler as wr
 import boto3
 from dvd_wrangler import DVDWrangler
 
+# adding transformations to the system path
 sys.path.insert(0, "/home/luis/code/dvd-rental-modeling/transformations")
 
 logger = logging.getLogger()
