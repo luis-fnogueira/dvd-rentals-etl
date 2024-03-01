@@ -1,9 +1,12 @@
+# adding transformations to the system path
 import logging
+import sys
 
 import awswrangler as wr
 import boto3
+from dvd_wrangler import DVDWrangler
 
-from transformations.dvd_wrangler import DVDWrangler
+sys.path.insert(0, "/home/luis/code/dvd-rental-modeling/transformations")
 
 logger = logging.getLogger()
 logging.basicConfig(filename="loading.log", level=logging.INFO)
@@ -13,7 +16,7 @@ session = boto3.Session(profile_name="default")
 
 
 paths = [
-    "s3://dvd-rentals-datalake/silver/rental/",
+    "s3://dvd-rentals-datalake/silver/fact_rentals/",
     "s3://dvd-rentals-datalake/silver/staff/",
     "s3://dvd-rentals-datalake/silver/country/",
     "s3://dvd-rentals-datalake/silver/city/",
@@ -25,7 +28,7 @@ paths = [
 
 dataframes_dict = DVDWrangler.read_parquet_files(paths, session)
 
-rental = dataframes_dict["rental"]
+fact_rentals = dataframes_dict["fact_rentals"]
 staff = dataframes_dict["staff"]
 country = dataframes_dict["country"]
 city = dataframes_dict["city"]
@@ -35,15 +38,37 @@ customer = dataframes_dict["customer"]
 
 
 method_calls = [
-    {"df": staff, "table": "dim_staff", "columns": ["address_id", "store_id"]},
-    {"df": city, "table": "dim_city", "columns": ["country_id"]},
-    {"df": address, "table": "dim_address", "columns": ["city_id"]},
+    {
+        "df": staff,
+        "table": "dim_staff",
+        "path": "s3://dvd-rentals-datalake/gold/staff/",
+    },
+    {"df": city, "table": "dim_city", "path": "s3://dvd-rentals-datalake/gold/city/"},
+    {
+        "df": address,
+        "table": "dim_address",
+        "path": "s3://dvd-rentals-datalake/gold/address/",
+    },
     {
         "df": payment,
         "table": "dim_payment",
-        "columns": ["customer_id", "staff_id", "staff_id"],
+        "path": "s3://dvd-rentals-datalake/gold/payment/",
     },
-    {"df": customer, "table": "dim_customer", "columns": ["address_id", "store_id"]},
+    {
+        "df": country,
+        "table": "dim_country",
+        "path": "s3://dvd-rentals-datalake/gold/country/",
+    },
+    {
+        "df": customer,
+        "table": "dim_customer",
+        "path": "s3://dvd-rentals-datalake/gold/customer/",
+    },
+    {
+        "df": fact_rentals,
+        "table": "fact_rentals",
+        "path": "s3://dvd-rentals-datalake/gold/fact_rentals/",
+    },
 ]
 
 
@@ -51,7 +76,14 @@ for call_info in method_calls:
 
     df = call_info["df"]
     table = call_info["table"]
+    path = call_info["path"]
 
-    wr.athena.to_iceberg(df=df, database="gold_dimensional_dvd_rental", table=table)
+    wr.athena.to_iceberg(
+        df=df,
+        database="gold_dimensional_dvd_rental",
+        table_location=path,
+        table=table,
+        temp_path="s3://dvd-rentals-datalake/temp-path/",
+    )
 
     logger.info(f"{table} loaded")

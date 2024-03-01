@@ -59,12 +59,12 @@ fact_rentals = duckdb.query(query).to_df()
 logger.info("Fact table created")
 
 # Loading fact table
-wr.s3.to_parquet(
-    df=fact_rentals,
-    path="s3://dvd-rentals-datalake/silver/fact_rentals/",
-    dataset=True,
-    partition_cols=["rental_date"],
-)
+# wr.s3.to_parquet(
+#    df=fact_rentals,
+#    path="s3://dvd-rentals-datalake/silver/fact_rentals/",
+#    dataset=True,
+#    partition_cols=["rental_date"],
+# )
 
 logger.info("Fact table loaded")
 
@@ -99,6 +99,12 @@ method_calls = [
         "path": "s3://dvd-rentals-datalake/silver/customer/",
         "partition_cols": ["customer_id"],
     },
+    {
+        "df": country,
+        "columns": [""],
+        "path": "s3://dvd-rentals-datalake/silver/country/",
+        "partition_cols": ["country_id"],
+    },
 ]
 
 # Dropping unnecessary columns and loading them to S3
@@ -109,7 +115,9 @@ for call_info in method_calls:
     path = call_info["path"]
     partition_cols = call_info["partition_cols"]
 
-    DVDWrangler.drop_columns(df=df, columns=columns)
+    # As country does not have a column to be dropped
+    if path != "s3://dvd-rentals-datalake/silver/country/":
+        DVDWrangler.drop_columns(df=df, columns=columns)
 
     logger.info(f"Columns dropped in {path}")
 
